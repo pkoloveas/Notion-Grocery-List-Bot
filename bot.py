@@ -20,7 +20,7 @@ class Bot:
     def setup(self) -> None:
         try:
             self.BOT_TOKEN: str = os.getenv('BOT_TOKEN')
-            self.USERNAME: str = os.getenv('TELEGRAM_USERNAME')
+            self.USERNAMES: str = os.getenv('TELEGRAM_USERNAMES').split(",")
             self.notion: NotionService = NotionService()
             self.updater: Type[Updater] = Updater(self.BOT_TOKEN, use_context=True)
             self.dispatcher = self.updater.dispatcher
@@ -30,9 +30,9 @@ class Bot:
             raise BotException(e)
 
     def register_handlers(self) -> None:
-        self.dispatcher.add_handler(CommandHandler("start", self.start_command, Filters.user(username=self.USERNAME)))
-        self.dispatcher.add_handler(CommandHandler("list", self.list_command, Filters.user(username=self.USERNAME)))
-        self.dispatcher.add_handler(CommandHandler("help", self.help_command, Filters.user(username=self.USERNAME)))
+        self.dispatcher.add_handler(CommandHandler("start", self.start_command, Filters.user(username=self.USERNAMES)))
+        self.dispatcher.add_handler(CommandHandler("list", self.list_command, Filters.user(username=self.USERNAMES)))
+        self.dispatcher.add_handler(CommandHandler("help", self.help_command, Filters.user(username=self.USERNAMES)))
         self.dispatcher.add_error_handler(self.error)
 
     def start_command(self, update, context) -> None:
