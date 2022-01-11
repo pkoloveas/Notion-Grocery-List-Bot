@@ -1,6 +1,6 @@
 import os
 import logging
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Updater, CommandHandler, Filters
 from NotionService import NotionService
 from typing import Type
 
@@ -30,9 +30,9 @@ class Bot:
             raise BotException(e)
 
     def register_handlers(self) -> None:
-        self.dispatcher.add_handler(CommandHandler("start", self.start_command))
-        self.dispatcher.add_handler(CommandHandler("list", self.list_command))
-        self.dispatcher.add_handler(CommandHandler("help", self.help_command))
+        self.dispatcher.add_handler(CommandHandler("start", self.start_command, Filters.user(username=self.USERNAME)))
+        self.dispatcher.add_handler(CommandHandler("list", self.list_command, Filters.user(username=self.USERNAME)))
+        self.dispatcher.add_handler(CommandHandler("help", self.help_command, Filters.user(username=self.USERNAME)))
         self.dispatcher.add_error_handler(self.error)
 
     def start_command(self, update, context) -> None:
@@ -42,13 +42,9 @@ class Bot:
         update.message.reply_text('Type /list to get the grocery list.')
 
     def list_command(self, update, context) -> None:
-        sender_username = update.message.from_user.username
-        if sender_username == self.USERNAME:
-            data = '\n'.join(self.notion.get_grocery_list())
-            logger.info('Successfully queried the database')
-            update.message.reply_text(data)
-        else:
-            update.message.reply_text("⛔ Sorry, you are not authorized for this bot.")
+        data = '\n'.join(self.notion.get_grocery_list())
+        logger.info('Successfully queried the database')
+        update.message.reply_text(data)
 
     def error(self, update, context) -> None:
         """Log Errors caused by Updates."""
